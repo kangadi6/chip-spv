@@ -1121,6 +1121,51 @@ void *CHIPContext::allocate(size_t Size, size_t Alignment,
   return AllocatedPtr;
 }
 
+void CHIPContext::memAddressReserve(void **Dptr, size_t size, size_t alignment,
+                                    void *addr, unsigned long long flags){
+  std::lock_guard<std::mutex> Lock(ContextMtx);
+  memAddressReserveImpl(Dptr, size, alignment, addr, flags);
+}
+
+void CHIPContext::memCreate(hipMemGenericAllocationHandle_t *handle, size_t size,
+                           const hipMemAllocationProp_t *prop, unsigned long long flags) {
+  std::lock_guard<std::mutex> Lock(ContextMtx);
+  memCreateImpl(handle, size, prop, flags);
+}
+
+void CHIPContext::memMap(hipDeviceptr_t Dptr, size_t size, size_t offset,
+                         hipMemGenericAllocationHandle_t handle, unsigned long long flags) {
+  std::lock_guard<std::mutex> Lock(ContextMtx);
+  memMapImpl(Dptr, size, offset, handle, flags);
+}
+
+void CHIPContext::memSetAccess(hipDeviceptr_t Dptr, size_t size,
+                              const hipMemAccessDesc_t *desc, size_t count) {
+  std::lock_guard<std::mutex> Lock(ContextMtx);
+  memSetAccessImpl(Dptr, size, desc, count);
+}
+
+void CHIPContext::memGetAccess (unsigned long long* flags,
+                              const hipMemLocation* location, hipDeviceptr_t ptr) {
+  std::lock_guard<std::mutex> Lock(ContextMtx);
+  memGetAccessImpl(flags, location, ptr);
+}
+
+void CHIPContext::memRelease (hipMemGenericAllocationHandle_t handle) {
+  std::lock_guard<std::mutex> Lock(ContextMtx);
+  memReleaseImpl(handle);
+}
+
+void CHIPContext::memUnmap (hipDeviceptr_t ptr, size_t size) {
+  std::lock_guard<std::mutex> Lock(ContextMtx);
+  memUnmapImpl(Dptr, size);
+}
+
+void CHIPContext::memAddressFree (hipDeviceptr_t ptr, size_t size) {
+  std::lock_guard<std::mutex> Lock(ContextMtx);
+  memAddressFreeImpl(Dptr, size);
+}
+
 unsigned int CHIPContext::getFlags() { return Flags_; }
 
 void CHIPContext::setFlags(unsigned int Flags) { Flags_ = Flags; }
@@ -1832,11 +1877,15 @@ void CHIPQueue::memPrefetch(const void *Ptr, size_t Count) {
   ChipContext_->syncQueues(this);
 #endif
   std::lock_guard<std::mutex> Lock(QueueMtx);
+  memPrefetchImpl(Ptr, Count);
+}
 
-  auto ChipEvent = memPrefetchImpl(Ptr, Count);
-  ChipEvent->Msg = "memPrefetch";
-  updateLastEvent(ChipEvent);
-  ChipEvent->track();
+void CHIPQueue::memAdvise(const void* ptr, size_t count, hipMemoryAdvise advise){
+#ifdef ENFORCE_QUEUE_SYNC
+  ChipContext_->syncQueues(this);
+#endif
+  std::lock_guard<std::mutex> Lock(QueueMtx);
+  memAdviseImpl(ptr, count, advise);
 }
 
 void CHIPQueue::launchKernel(CHIPKernel *ChipKernel, dim3 NumBlocks,

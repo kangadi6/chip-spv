@@ -772,6 +772,43 @@ CHIPKernelOpenCL::CHIPKernelOpenCL(const cl::Kernel &&ClKernel,
   }
 }
 
+void CHIPContextOpenCL::memAddressReserveImpl(void  **Dptr, size_t size, size_t alignment,
+                                               void *addr, unsigned long long flags) {
+  UNIMPLEMENTED(nullptr);
+}
+
+void CHIPContextOpenCL::memCreateImpl(hipMemGenericAllocationHandle_t *handle, size_t size,
+                                       const hipMemAllocationProp_t *prop, unsigned long long flags) {
+  UNIMPLEMENTED(nullptr);
+}
+
+void CHIPContextOpenCL::memMapImpl(hipDeviceptr_t Dptr, size_t size, size_t offset,
+                                   hipMemGenericAllocationHandle_t handle, unsigned long long flags) {
+  UNIMPLEMENTED(nullptr);
+}
+
+void CHIPContextOpenCL::memSetAccessImpl (hipDeviceptr_t Dptr, size_t size,
+                                           const hipMemAccessDesc_t *desc, size_t count) {
+  UNIMPLEMENTED(nullptr);
+}
+
+void CHIPContextOpenCL::memGetAccessImpl (unsigned long long* flags,
+                    const hipMemLocation* location, hipDeviceptr_t ptr) {
+  UNIMPLEMENTED(nullptr);
+}
+
+void CHIPContextOpenCL::memReleaseImpl (hipMemGenericAllocationHandle_t handle) {
+  UNIMPLEMENTED(nullptr);
+}
+
+void CHIPContextOpenCL::memUnmapImpl (hipDeviceptr_t ptr, size_t size) {
+  UNIMPLEMENTED(nullptr);
+}
+
+void CHIPContextOpenCL::memAddressFreeImpl (hipDeviceptr_t ptr, size_t size) {
+  UNIMPLEMENTED(nullptr);
+}
+
 // CHIPContextOpenCL
 //*************************************************************************
 
@@ -1019,7 +1056,12 @@ hipError_t CHIPQueueOpenCL::getBackendHandles(uintptr_t *NativeInfo,
   return hipSuccess;
 }
 
-CHIPEvent *CHIPQueueOpenCL::memPrefetchImpl(const void *Ptr, size_t Count) {
+void CHIPQueueOpenCL::memPrefetchImpl(const void *Ptr, size_t Count) {
+  UNIMPLEMENTED(nullptr);
+}
+
+void CHIPQueueOpenCL::memAdviseImpl(const void* Ptr, size_t Count,
+                                   hipMemoryAdvise Advise) {
   UNIMPLEMENTED(nullptr);
 }
 

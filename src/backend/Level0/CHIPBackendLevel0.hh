@@ -236,9 +236,8 @@ public:
   virtual CHIPEvent *
   enqueueBarrierImpl(std::vector<CHIPEvent *> *EventsToWaitFor) override;
 
-  virtual CHIPEvent *memPrefetchImpl(const void *Ptr, size_t Count) override {
-    UNIMPLEMENTED(nullptr);
-  }
+  virtual void memPrefetchImpl(const void *Ptr, size_t Count) override;
+  virtual void memAdviseImpl(const void* Ptr, size_t Count, hipMemoryAdvise Advise) override;
 
 }; // end CHIPQueueLevel0
 
@@ -276,6 +275,24 @@ public:
 
   void *allocateImpl(size_t Size, size_t Alignment, hipMemoryType MemTy,
                      CHIPHostAllocFlags Flags = CHIPHostAllocFlags()) override;
+
+  virtual void memAddressReserveImpl(void  **Dptr, size_t size, size_t alignment,
+                                     void *addr, unsigned long long flags) override;
+  virtual void memCreateImpl(hipMemGenericAllocationHandle_t *handle, size_t size,
+                            const hipMemAllocationProp_t *prop, unsigned long long flags) override;
+  virtual void memMapImpl(hipDeviceptr_t Dptr, size_t size, size_t offset,
+                          hipMemGenericAllocationHandle_t handle, unsigned long long flags) override;
+  virtual void memSetAccessImpl (hipDeviceptr_t Dptr, size_t size,
+                                 const hipMemAccessDesc_t *desc, size_t count) override;
+
+  virtual void memGetAccessImpl (unsigned long long* flags,
+                    const hipMemLocation* location, hipDeviceptr_t ptr) override;
+
+  virtual void memReleaseImpl (hipMemGenericAllocationHandle_t handle) override;
+
+  virtual void memUnmapImpl (hipDeviceptr_t ptr, size_t size) override;
+
+  virtual void memAddressFreeImpl (hipDeviceptr_t ptr, size_t size) override;
 
   bool isAllocatedPtrMappedToVM(void *Ptr) override { return false; } // TODO
   void freeImpl(void *Ptr) override;

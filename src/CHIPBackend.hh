@@ -1549,6 +1549,39 @@ public:
   allocateImpl(size_t Size, size_t Alignment, hipMemoryType MemType,
                CHIPHostAllocFlags Flags = CHIPHostAllocFlags()) = 0;
 
+  virtual void memAddressReserveImpl(void  **Dptr, size_t size,
+                                    size_t alignment, void *addr, unsigned long long flags) = 0;
+  void memAddressReserve(void **Dptr, size_t size,
+                        size_t alignment, void *addr, unsigned long long flags);
+
+  virtual void memCreateImpl(hipMemGenericAllocationHandle_t *handle, size_t size,
+                            const hipMemAllocationProp_t *prop, unsigned long long flags) = 0;
+  void memCreate(hipMemGenericAllocationHandle_t *handle, size_t size,
+                const hipMemAllocationProp_t *prop, unsigned long long flags);
+
+  virtual void memMapImpl(hipDeviceptr_t Dptr, size_t size, size_t offset,
+                         hipMemGenericAllocationHandle_t handle, unsigned long long flags) = 0;
+  void memMap(hipDeviceptr_t Dptr, size_t size, size_t offset,
+              hipMemGenericAllocationHandle_t handle, unsigned long long flags);
+
+  virtual void memSetAccessImpl (hipDeviceptr_t Dptr, size_t size,
+                                const hipMemAccessDesc_t *desc, size_t count) = 0;
+  void memSetAccess(hipDeviceptr_t Dptr, size_t size,
+                    const hipMemAccessDesc_t *desc, size_t count);
+
+  virtual void memGetAccessImpl (unsigned long long* flags,
+                    const hipMemLocation* location, hipDeviceptr_t ptr) = 0;
+  void memGetAccess (unsigned long long* flags,
+                    const hipMemLocation* location, hipDeviceptr_t ptr);
+
+  virtual void memReleaseImpl (hipMemGenericAllocationHandle_t handle) = 0;
+  void memRelease (hipMemGenericAllocationHandle_t handle);
+
+  virtual void memUnmapImpl (hipDeviceptr_t ptr, size_t size) = 0;
+  void memUnmap (hipDeviceptr_t ptr, size_t size);
+
+  virtual void memAddressFreeImpl (hipDeviceptr_t ptr, size_t size) = 0;
+  void memAddressFree (hipDeviceptr_t ptr, size_t size);
   /**
    * @brief Returns true if the pointer is mapped to virtual memory with
    * updates synchronized to it automatically at synchronization points.
@@ -2135,8 +2168,11 @@ public:
    * @return false
    */
 
-  virtual CHIPEvent *memPrefetchImpl(const void *Ptr, size_t Count) = 0;
+  virtual void memPrefetchImpl(const void *Ptr, size_t Count) = 0;
   void memPrefetch(const void *Ptr, size_t Count);
+
+  virtual void memAdviseImpl(const void* ptr, size_t count, hipMemoryAdvise advice) = 0;
+  void memAdvise(const void* ptr, size_t count, hipMemoryAdvise advice);
 
   /**
    * @brief Launch a kernel on this queue given a host pointer and arguments

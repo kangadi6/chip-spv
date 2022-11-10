@@ -151,6 +151,12 @@
 #define cudaMemcpyDeviceToHost hipMemcpyDeviceToHost
 #define cudaMemcpyDeviceToDevice hipMemcpyDeviceToDevice
 #define cudaMemcpyHostToHost hipMemcpyHostToHost
+#define cudaMemAdviseSetReadMostly hipMemAdviseSetReadMostly
+#define cudaMemAdviceUnsetReadMostly hipMemAdviseUnsetReadMostly
+#define cudaMemAdviseSetPreferredLocation hipMemAdviseSetPreferredLocation
+#define cudaMemAdviseUnsetPreferredLocation hipMemAdviseUnsetPreferredLocation
+#define cudaMemAdviseSetAccessedBy hipMemAdviseSetAccessedBy
+#define cudaMemAdviseUnsetAccessedBy hipMemAdviseUnsetAccessedBy
 
 // device attributes
 #define cudaDevAttrCudaCompatibleBegin hipDeviceAttributeCudaCompatibleBegin
@@ -370,6 +376,33 @@ using CUfunction = hipFunction_t;
 using CUjit_option = hipJitOption;
 using CUstream = hipStream_t;
 using CUtexObject = hipTextureObject_t;
+using CUmemGenericAllocationHandle = hipMemGenericAllocationHandle_t;
+using CUmemAllocationHandleType = hipMemAllocationHandleType;
+using CUmemAllocationType = hipMemAllocationType;
+using CUmemLocation = hipMemLocation;
+using CUmemAllocationProp = hipMemAllocationProp_t;
+using CUmemAccessDesc = hipMemAccessDesc_t;
+using CUmemAccess_flags = hipMemAccess_flags;
+
+#define CU_MEM_LOCATION_TYPE_INVALID HIP_MEM_LOCATION_TYPE_INVALID
+#define CU_MEM_LOCATION_TYPE_DEVICE HIP_MEM_LOCATION_TYPE_DEVICE
+#define CU_MEM_LOCATION_TYPE_MAX HIP_MEM_LOCATION_TYPE_MAX
+
+#define CU_MEM_HANDLE_TYPE_NONE HIP_MEM_HANDLE_TYPE_NONE
+#define CU_MEM_HANDLE_TYPE_POSIX_FILE_DESCRIPTOR HIP_MEM_HANDLE_TYPE_POSIX_FILE_DESCRIPTOR
+#define CU_MEM_HANDLE_TYPE_WIN32 HIP_MEM_HANDLE_TYPE_WIN32
+#define CU_MEM_HANDLE_TYPE_WIN32_KMT HIP_MEM_HANDLE_TYPE_WIN32_KMT
+#define CU_MEM_HANDLE_TYPE_MAX HIP_MEM_HANDLE_TYPE_MAX
+
+#define CU_MEM_ALLOCATION_TYPE_INVALID HIP_MEM_ALLOCATION_TYPE_INVALID
+#define CU_MEM_ALLOCATION_TYPE_PINNED HIP_MEM_ALLOCATION_TYPE_PINNED
+#define CU_MEM_ALLOCATION_TYPE_MAX HIP_MEM_ALLOCATION_TYPE_MAX
+
+#define CU_MEM_ACCESS_FLAGS_PROT_NONE HIP_MEM_ACCESS_FLAGS_PROT_NONE
+#define CU_MEM_ACCESS_FLAGS_PROT_READ HIP_MEM_ACCESS_FLAGS_PROT_READ
+#define CU_MEM_ACCESS_FLAGS_PROT_READWRITE HIP_MEM_ACCESS_FLAGS_PROT_READWRITE
+#define CU_MEM_ACCESS_FLAGS_PROT_MAX HIP_MEM_ACCESS_FLAGS_PROT_MAX
+
 #define CUDART_CB
 #define CUDA_ARRAY_DESCRIPTOR HIP_ARRAY_DESCRIPTOR
 #define CUDA_ARRAY3D_DESCRIPTOR HIP_ARRAY3D_DESCRIPTOR
@@ -1138,6 +1171,48 @@ static inline cudaError_t cuModuleGetFunction(CUfunction *Function,
                                               CUmodule Module,
                                               const char *Name) {
   return hipModuleGetFunction(Function, Module, Name);
+}
+
+static inline cudaError_t cuMemAddressReserve (CUdeviceptr* ptr,
+                                  size_t size, size_t alignment,
+                                  CUdeviceptr addr,
+                                  unsigned long long flags) {
+  return hipMemAddressReserve(ptr, size, alignment, addr, flags);
+}
+
+static inline cudaError_t cuMemCreate (CUmemGenericAllocationHandle* handle,
+                                       size_t size, const CUmemAllocationProp* prop,
+                                       unsigned long long flags) {
+  return hipMemCreate(handle, size, prop, flags);
+}
+
+static inline cudaError_t cuMemMap (CUdeviceptr Dptr, size_t size,
+                                    size_t offset, CUmemGenericAllocationHandle handle,
+                                    unsigned long long flags ) {
+  return hipMemMap(Dptr, size, offset, handle, flags);
+}
+
+static inline cudaError_t cuMemSetAccess (CUdeviceptr ptr, size_t size,
+                                          const CUmemAccessDesc* desc,
+                                          size_t count ) {
+  return hipMemSetAccess (ptr, size, desc, count);
+}
+
+static inline cudaError_t cuMemGetAccess (unsigned long long* flags,
+                                          const CUmemLocation* location, CUdeviceptr ptr) {
+  return hipMemGetAccess(flags, location, ptr);
+}
+
+static inline cudaError_t cuMemRelease (CUmemGenericAllocationHandle handle) {
+  return hipMemRelease(handle);
+}
+
+static inline cudaError_t cuMemUnmap (CUdeviceptr ptr, size_t size) {
+  return hipMemUnmap(ptr, size);
+}
+
+static inline cudaError_t cuMemAddressFree (CUdeviceptr ptr, size_t size) {
+  return hipMemAddressFree(ptr, size);
 }
 
 // TODO there exists "hipLaunchCooperativeKernel" but it takes different arguments

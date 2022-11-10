@@ -1200,6 +1200,53 @@ CHIPQueueLevel0::enqueueBarrierImpl(std::vector<CHIPEvent *> *EventsToWaitFor) {
   return EventToSignal;
 }
 
+void
+CHIPQueueLevel0::memPrefetchImpl(const void *Ptr, size_t Count) {
+  logTrace("CHIPQueueLevel0::memPrefetchImpl");
+
+  auto CommandList = getCmdList();
+
+  ze_result_t status = zeCommandListAppendMemoryPrefetch(CommandList, Ptr, Count);
+  CHIPERR_CHECK_LOG_AND_THROW(status, ZE_RESULT_SUCCESS, hipErrorTbd);
+  executeCommandList(CommandList);
+}
+
+
+void CHIPQueueLevel0::memAdviseImpl(const void* Ptr, size_t Count, hipMemoryAdvise Advise) {
+  ze_memory_advice_t zeAdvise = ZE_MEMORY_ADVICE_FORCE_UINT32;
+  logTrace("CHIPQueueLevel0::memAdviseImpl");
+
+  switch (Advise) {
+    case hipMemAdviseSetReadMostly:
+      zeAdvise = ZE_MEMORY_ADVICE_SET_READ_MOSTLY;
+
+    case hipMemAdviseUnsetReadMostly:
+      zeAdvise = ZE_MEMORY_ADVICE_CLEAR_READ_MOSTLY;
+
+    case hipMemAdviseSetPreferredLocation:
+      zeAdvise = ZE_MEMORY_ADVICE_SET_PREFERRED_LOCATION;
+
+    case hipMemAdviseUnsetPreferredLocation:
+      zeAdvise = ZE_MEMORY_ADVICE_CLEAR_PREFERRED_LOCATION;
+
+    case hipMemAdviseSetAccessedBy:
+      zeAdvise = ZE_MEMORY_ADVICE_BIAS_CACHED;
+
+    case hipMemAdviseUnsetAccessedBy:
+      zeAdvise = ZE_MEMORY_ADVICE_BIAS_UNCACHED;
+
+    default:
+      zeAdvise = ZE_MEMORY_ADVICE_FORCE_UINT32;
+  }
+
+  auto CommandList = getCmdList();
+  ze_result_t status = zeCommandListAppendMemAdvise(CommandList,
+                                  ZeDev_, Ptr, Count, zeAdvise);
+
+  CHIPERR_CHECK_LOG_AND_THROW(status, ZE_RESULT_SUCCESS, hipErrorTbd);
+  executeCommandList(CommandList);
+}
+
 CHIPEvent *CHIPQueueLevel0::memCopyAsyncImpl(void *Dst, const void *Src,
                                              size_t Size) {
   logTrace("CHIPQueueLevel0::memCopyAsync");
@@ -1601,6 +1648,83 @@ void *CHIPContextLevel0::allocateImpl(size_t Size, size_t Alignment,
     return Ptr;
   }
   CHIPERR_LOG_AND_THROW("Failed to allocate memory", hipErrorMemoryAllocation);
+}
+
+void CHIPContextLevel0::memAddressReserveImpl(void  **Dptr, size_t size, size_t alignment, void *addr, unsigned long long flags) {
+  logTrace("CHIPQueueLevel0::memAddressReserveImpl");
+  *Dptr = NULL;
+
+  if( alignment != 0) {
+    CHIPERR_LOG_AND_THROW("Failed to reserve memory", hipErrorMemoryAllocation);
+    return;
+  }
+  auto status = zeVirtualMemReserve(ZeCtx, addr, size, Dptr);
+  CHIPERR_CHECK_LOG_AND_THROW(status, ZE_RESULT_SUCCESS, hipErrorTbd);
+}
+
+void CHIPContextLevel0::memCreateImpl(hipMemGenericAllocationHandle_t *handle, size_t size, const hipMemAllocationProp_t *prop, unsigned long long flags) {
+  logTrace("CHIPQueueLevel0::memCreateImpl");
+
+  // TODO: Parse hipMemAllocationProp_t
+  ze_physical_mem_desc_t pmemDesc = {
+      ZE_STRUCTURE_TYPE_PHYSICAL_MEM_DESC,
+      nullptr,
+      0, // flags
+      size // size
+  };
+
+  auto ChipDev = (CHIPDeviceLevel0 *)Backend->getActiveDevice();
+  auto status = zePhysicalMemCreate(ZeCtx, ChipDev->get(), &pmemDesc, (ze_physical_mem_handle_t*) handle);
+
+  CHIPERR_CHECK_LOG_AND_THROW(status, ZE_RESULT_SUCCESS, hipErrorTbd);
+}
+
+void CHIPContextLevel0::memMapImpl(hipDeviceptr_t Dptr, size_t size, size_t offset, hipMemGenericAllocationHandle_t handle, unsigned long long flags) {
+  logTrace("CHIPQueueLevel0::memMapImpl");
+
+  // TODO: verify casting handle isn't a problem
+  auto status = zeVirtualMemMap(ZeCtx, Dptr, size, (ze_physical_mem_handle_t) handle, 0,
+    ZE_MEMORY_ACCESS_ATTRIBUTE_READWRITE);
+
+  CHIPERR_CHECK_LOG_AND_THROW(status, ZE_RESULT_SUCCESS, hipErrorTbd);
+}
+
+void CHIPContextLevel0::memSetAccessImpl (hipDeviceptr_t Dptr, size_t size, const hipMemAccessDesc_t *desc, size_t count) {
+  logTrace("CHIPQueueLevel0::memSetAccessImpl");
+  // TODO: parse hipMemAccessDesc_t instead of hardcode
+  auto status = zeVirtualMemSetAccessAttribute(ZeCtx, Dptr, size, ZE_MEMORY_ACCESS_ATTRIBUTE_READWRITE);
+
+  CHIPERR_CHECK_LOG_AND_THROW(status, ZE_RESULT_SUCCESS, hipErrorTbd);
+}
+
+void CHIPContextLevel0::memGetAccessImpl (unsigned long long* flags,
+                    const hipMemLocation* location, hipDeviceptr_t ptr) {
+  UNIMPLEMENTED();
+  // TODO: maintain info of hipMemLocation struct per context
+  //logTrace("CHIPQueueLevel0::memGetAccessImpl");
+  //auto status = zeVirtualMemGetAccessAttribute(ZeCtx, const void *ptr, size_t size, ze_memory_access_attribute_t *access, size_t *outSize)
+  //CHIPERR_CHECK_LOG_AND_THROW(status, ZE_RESULT_SUCCESS, hipErrorTbd);
+}
+
+void CHIPContextLevel0::memReleaseImpl (hipMemGenericAllocationHandle_t handle) {
+  logTrace("CHIPQueueLevel0::memReleaseImpl");
+  auto status = zePhysicalMemDestroy(ZeCtx, ze_physical_mem_handle_t(handle));
+
+  CHIPERR_CHECK_LOG_AND_THROW(status, ZE_RESULT_SUCCESS, hipErrorTbd);
+}
+
+void CHIPContextLevel0::memUnmapImpl (hipDeviceptr_t ptr, size_t size) {
+  logTrace("CHIPQueueLevel0::memUnmapImpl");
+  auto status = zeVirtualMemUnmap(ZeCtx, ptr, size);
+
+  CHIPERR_CHECK_LOG_AND_THROW(status, ZE_RESULT_SUCCESS, hipErrorTbd);
+}
+
+void CHIPContextLevel0::memAddressFreeImpl (hipDeviceptr_t ptr, size_t size) {
+  logTrace("CHIPQueueLevel0::memAddressFreeImpl");
+  auto status =  zeVirtualMemFree(ZeCtx , ptr, size);
+
+  CHIPERR_CHECK_LOG_AND_THROW(status, ZE_RESULT_SUCCESS, hipErrorTbd);
 }
 
 // CHIPDeviceLevelZero

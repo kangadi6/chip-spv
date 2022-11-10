@@ -1707,7 +1707,6 @@ hipError_t hipFreeHost(void *Ptr) { RETURN(hipHostFree(Ptr)); }
 hipError_t hipMemPrefetchAsync(const void *Ptr, size_t Count, int DstDevId,
                                hipStream_t Stream) {
   CHIP_TRY
-  UNIMPLEMENTED(hipErrorTbd);
   CHIPInitialize();
   NULLCHECK(Ptr);
   Stream = Backend->findQueue(Stream);
@@ -1723,7 +1722,7 @@ hipError_t hipMemPrefetchAsync(const void *Ptr, size_t Count, int DstDevId,
   CHIP_CATCH
 }
 
-hipError_t hipMemAdvise(const void *Ptr, size_t Count, hipMemoryAdvise Advice,
+hipError_t hipMemAdvise(const void *Ptr, size_t Count, hipMemoryAdvise Advise,
                         int DstDevId) {
   CHIP_TRY
   CHIPInitialize();
@@ -1733,7 +1732,9 @@ hipError_t hipMemAdvise(const void *Ptr, size_t Count, hipMemoryAdvise Advice,
     RETURN(hipSuccess);
   }
 
-  UNIMPLEMENTED(hipErrorNotSupported);
+  ERROR_CHECK_DEVNUM(DstDevId);
+  auto dev = Backend->getDevices()[DstDevId];
+  dev->getDefaultQueue()->memAdvise(Ptr, Count, Advise);
 
   RETURN(hipSuccess);
   CHIP_CATCH
@@ -3088,6 +3089,115 @@ hipError_t hipModuleGetFunction(hipFunction_t *Function, hipModule_t Module,
   ERROR_IF((Kernel == nullptr), hipErrorInvalidDeviceFunction);
 
   *Function = Kernel;
+  RETURN(hipSuccess);
+  CHIP_CATCH
+}
+
+hipError_t hipMemAddressReserve(hipDeviceptr_t *Dptr, size_t size, size_t alignment,
+                               hipDeviceptr_t addr, unsigned long long flags) {
+  CHIP_TRY
+  CHIPInitialize();
+  NULLCHECK(Dptr);
+
+  if (size == 0) {
+    RETURN(hipSuccess);
+  }
+
+  Backend->getActiveContext()->memAddressReserve(Dptr, size, alignment, addr, flags);
+
+  RETURN(hipSuccess);
+  CHIP_CATCH
+}
+
+hipError_t hipMemCreate(hipMemGenericAllocationHandle_t *handle, size_t size,
+                        const hipMemAllocationProp_t *prop, unsigned long long flags) {
+  CHIP_TRY
+  CHIPInitialize();
+  NULLCHECK(handle);
+
+  if (size == 0) {
+    RETURN(hipSuccess);
+  }
+
+  Backend->getActiveContext()->memCreate(handle, size, prop, flags);
+
+  RETURN(hipSuccess);
+  CHIP_CATCH
+}
+
+hipError_t hipMemMap(hipDeviceptr_t Dptr, size_t size, size_t offset,
+                    hipMemGenericAllocationHandle_t handle, unsigned long long flags) {
+  CHIP_TRY
+  CHIPInitialize();
+  NULLCHECK(Dptr);
+
+  if (size == 0) {
+    RETURN(hipSuccess);
+  }
+
+  Backend->getActiveContext()->memMap(Dptr, size, offset, handle, flags);
+
+  RETURN(hipSuccess);
+  CHIP_CATCH
+}
+
+hipError_t hipMemSetAccess (hipDeviceptr_t Dptr, size_t size,
+                            const hipMemAccessDesc_t *desc, size_t count) {
+  CHIP_TRY
+  CHIPInitialize();
+  NULLCHECK(Dptr);
+
+  if (size == 0) {
+    RETURN(hipSuccess);
+  }
+
+  Backend->getActiveContext()->memSetAccess(Dptr, size, desc, count);
+
+  RETURN(hipSuccess);
+  CHIP_CATCH
+}
+
+hipError_t hipMemGetAccess (unsigned long long* flags,
+                          const hipMemLocation* location, hipDeviceptr_t ptr) {
+  CHIP_TRY
+  CHIPInitialize();
+  NULLCHECK(ptr);
+
+  Backend->getActiveContext()->memGetAccess(flags, location, ptr);
+
+  RETURN(hipSuccess);
+  CHIP_CATCH
+}
+
+hipError_t hipMemRelease (hipMemGenericAllocationHandle_t handle) {
+  CHIP_TRY
+  CHIPInitialize();
+  NULLCHECK(handle);
+
+  Backend->getActiveContext()->memRelease(handle);
+
+  RETURN(hipSuccess);
+  CHIP_CATCH
+}
+
+hipError_t hipMemUnmap (hipDeviceptr_t ptr, size_t size) {
+  CHIP_TRY
+  CHIPInitialize();
+  NULLCHECK(ptr);
+
+  Backend->getActiveContext()->memUnmap(ptr, size);
+
+  RETURN(hipSuccess);
+  CHIP_CATCH
+}
+
+hipError_t hipMemAddressFree (hipDeviceptr_t ptr, size_t size) {
+  CHIP_TRY
+  CHIPInitialize();
+  NULLCHECK(ptr);
+
+  Backend->getActiveContext()->memAddressFree(ptr, size);
+
   RETURN(hipSuccess);
   CHIP_CATCH
 }
