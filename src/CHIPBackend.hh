@@ -1555,9 +1555,9 @@ public:
                         size_t alignment, void *addr, unsigned long long flags);
 
   virtual void memCreateImpl(hipMemGenericAllocationHandle_t *handle, size_t size,
-                            const hipMemAllocationProp_t *prop, unsigned long long flags) = 0;
+                            const hipMemAllocationProp *prop, unsigned long long flags) = 0;
   void memCreate(hipMemGenericAllocationHandle_t *handle, size_t size,
-                const hipMemAllocationProp_t *prop, unsigned long long flags);
+                const hipMemAllocationProp *prop, unsigned long long flags);
 
   virtual void memMapImpl(hipDeviceptr_t Dptr, size_t size, size_t offset,
                          hipMemGenericAllocationHandle_t handle, unsigned long long flags) = 0;
@@ -1565,9 +1565,9 @@ public:
               hipMemGenericAllocationHandle_t handle, unsigned long long flags);
 
   virtual void memSetAccessImpl (hipDeviceptr_t Dptr, size_t size,
-                                const hipMemAccessDesc_t *desc, size_t count) = 0;
+                                const hipMemAccessDesc *desc, size_t count) = 0;
   void memSetAccess(hipDeviceptr_t Dptr, size_t size,
-                    const hipMemAccessDesc_t *desc, size_t count);
+                    const hipMemAccessDesc *desc, size_t count);
 
   virtual void memGetAccessImpl (unsigned long long* flags,
                     const hipMemLocation* location, hipDeviceptr_t ptr) = 0;

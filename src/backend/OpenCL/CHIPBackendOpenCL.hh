@@ -154,11 +154,11 @@ public:
   void memAddressReserveImpl(void  **Dptr, size_t size, size_t alignment,
                              void *addr, unsigned long long flags) override;
   virtual void memCreateImpl(hipMemGenericAllocationHandle_t *handle, size_t size,
-                             const hipMemAllocationProp_t *prop, unsigned long long flags) override;
+                             const hipMemAllocationProp *prop, unsigned long long flags) override;
   virtual void memMapImpl(hipDeviceptr_t Dptr, size_t size, size_t offset,
                            hipMemGenericAllocationHandle_t handle, unsigned long long flags) override;
   virtual void memSetAccessImpl (hipDeviceptr_t Dptr, size_t size,
-                                 const hipMemAccessDesc_t *desc, size_t count) override;
+                                 const hipMemAccessDesc *desc, size_t count) override;
   virtual void memGetAccessImpl (unsigned long long* flags,
                                 const hipMemLocation* location, hipDeviceptr_t ptr) override;
   virtual void memReleaseImpl (hipMemGenericAllocationHandle_t handle) override;

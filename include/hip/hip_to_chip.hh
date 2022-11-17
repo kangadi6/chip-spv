@@ -44,52 +44,5 @@ typedef CHIPContext *hipCtx_t;
 typedef int hipDevice_t;
 typedef void *hipDeviceptr_t;
 
-typedef int hipMemGenericAllocationHandle_t;
-
-enum hipMemAllocationHandleType{
-    HIP_MEM_HANDLE_TYPE_NONE = 0x0,
-    HIP_MEM_HANDLE_TYPE_POSIX_FILE_DESCRIPTOR = 0x1,
-    HIP_MEM_HANDLE_TYPE_WIN32 = 0x2,
-    HIP_MEM_HANDLE_TYPE_WIN32_KMT = 0x4,
-    HIP_MEM_HANDLE_TYPE_MAX = 0x7FFFFFFF
-};
-
-enum hipMemAllocationType{
-    HIP_MEM_ALLOCATION_TYPE_INVALID = 0x0,
-    HIP_MEM_ALLOCATION_TYPE_PINNED = 0x1,
-    HIP_MEM_ALLOCATION_TYPE_MAX = 0x7FFFFFFF
-};
-
-enum hipMemLocationType {
-    HIP_MEM_LOCATION_TYPE_INVALID = 0x0,
-    HIP_MEM_LOCATION_TYPE_DEVICE = 0x1,
-    HIP_MEM_LOCATION_TYPE_MAX = 0x7FFFFFFF
-};
-
-enum hipMemAccess_flags {
-    HIP_MEM_ACCESS_FLAGS_PROT_NONE = 0x0,
-    HIP_MEM_ACCESS_FLAGS_PROT_READ = 0x1,
-    HIP_MEM_ACCESS_FLAGS_PROT_READWRITE = 0x3,
-    HIP_MEM_ACCESS_FLAGS_PROT_MAX = 0x7FFFFFFF,
-};
-
-typedef struct hipMemLocation {
-    int  id;
-    hipMemLocationType type;
-}hipMemLocation;
-
-typedef struct hipMemAllocationProp {
-    unsigned char  compressionType;
-    struct hipMemLocation location;
-    hipMemAllocationHandleType 	requestedHandleTypes;
-    hipMemAllocationType type;
-    unsigned short  usage;
-    void * win32HandleMetaData;
-} hipMemAllocationProp_t;
-
-typedef struct hipMemAccessDesc_t {
-    hipMemAccess_flags flags;
-    struct hipMemLocation location;
-} hipMemAccessDesc_t;
 
 #endif

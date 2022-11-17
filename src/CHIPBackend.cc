@@ -1128,7 +1128,7 @@ void CHIPContext::memAddressReserve(void **Dptr, size_t size, size_t alignment,
 }
 
 void CHIPContext::memCreate(hipMemGenericAllocationHandle_t *handle, size_t size,
-                           const hipMemAllocationProp_t *prop, unsigned long long flags) {
+                           const hipMemAllocationProp *prop, unsigned long long flags) {
   std::lock_guard<std::mutex> Lock(ContextMtx);
   memCreateImpl(handle, size, prop, flags);
 }
@@ -1140,7 +1140,7 @@ void CHIPContext::memMap(hipDeviceptr_t Dptr, size_t size, size_t offset,
 }
 
 void CHIPContext::memSetAccess(hipDeviceptr_t Dptr, size_t size,
-                              const hipMemAccessDesc_t *desc, size_t count) {
+                              const hipMemAccessDesc *desc, size_t count) {
   std::lock_guard<std::mutex> Lock(ContextMtx);
   memSetAccessImpl(Dptr, size, desc, count);
 }
@@ -1158,12 +1158,12 @@ void CHIPContext::memRelease (hipMemGenericAllocationHandle_t handle) {
 
 void CHIPContext::memUnmap (hipDeviceptr_t ptr, size_t size) {
   std::lock_guard<std::mutex> Lock(ContextMtx);
-  memUnmapImpl(Dptr, size);
+  memUnmapImpl(ptr, size);
 }
 
 void CHIPContext::memAddressFree (hipDeviceptr_t ptr, size_t size) {
   std::lock_guard<std::mutex> Lock(ContextMtx);
-  memAddressFreeImpl(Dptr, size);
+  memAddressFreeImpl(ptr, size);
 }
 
 unsigned int CHIPContext::getFlags() { return Flags_; }

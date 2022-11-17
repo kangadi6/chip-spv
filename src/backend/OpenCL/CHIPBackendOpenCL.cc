@@ -778,7 +778,7 @@ void CHIPContextOpenCL::memAddressReserveImpl(void  **Dptr, size_t size, size_t 
 }
 
 void CHIPContextOpenCL::memCreateImpl(hipMemGenericAllocationHandle_t *handle, size_t size,
-                                       const hipMemAllocationProp_t *prop, unsigned long long flags) {
+                                       const hipMemAllocationProp *prop, unsigned long long flags) {
   UNIMPLEMENTED(nullptr);
 }
 
@@ -788,7 +788,7 @@ void CHIPContextOpenCL::memMapImpl(hipDeviceptr_t Dptr, size_t size, size_t offs
 }
 
 void CHIPContextOpenCL::memSetAccessImpl (hipDeviceptr_t Dptr, size_t size,
-                                           const hipMemAccessDesc_t *desc, size_t count) {
+                                           const hipMemAccessDesc *desc, size_t count) {
   UNIMPLEMENTED(nullptr);
 }
 

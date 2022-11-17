@@ -1662,10 +1662,10 @@ void CHIPContextLevel0::memAddressReserveImpl(void  **Dptr, size_t size, size_t 
   CHIPERR_CHECK_LOG_AND_THROW(status, ZE_RESULT_SUCCESS, hipErrorTbd);
 }
 
-void CHIPContextLevel0::memCreateImpl(hipMemGenericAllocationHandle_t *handle, size_t size, const hipMemAllocationProp_t *prop, unsigned long long flags) {
+void CHIPContextLevel0::memCreateImpl(hipMemGenericAllocationHandle_t *handle, size_t size, const hipMemAllocationProp *prop, unsigned long long flags) {
   logTrace("CHIPQueueLevel0::memCreateImpl");
 
-  // TODO: Parse hipMemAllocationProp_t
+  // TODO: Parse hipMemAllocationProp
   ze_physical_mem_desc_t pmemDesc = {
       ZE_STRUCTURE_TYPE_PHYSICAL_MEM_DESC,
       nullptr,
@@ -1689,9 +1689,9 @@ void CHIPContextLevel0::memMapImpl(hipDeviceptr_t Dptr, size_t size, size_t offs
   CHIPERR_CHECK_LOG_AND_THROW(status, ZE_RESULT_SUCCESS, hipErrorTbd);
 }
 
-void CHIPContextLevel0::memSetAccessImpl (hipDeviceptr_t Dptr, size_t size, const hipMemAccessDesc_t *desc, size_t count) {
+void CHIPContextLevel0::memSetAccessImpl (hipDeviceptr_t Dptr, size_t size, const hipMemAccessDesc *desc, size_t count) {
   logTrace("CHIPQueueLevel0::memSetAccessImpl");
-  // TODO: parse hipMemAccessDesc_t instead of hardcode
+  // TODO: parse hipMemAccessDesc instead of hardcode
   auto status = zeVirtualMemSetAccessAttribute(ZeCtx, Dptr, size, ZE_MEMORY_ACCESS_ATTRIBUTE_READWRITE);
 
   CHIPERR_CHECK_LOG_AND_THROW(status, ZE_RESULT_SUCCESS, hipErrorTbd);

@@ -3110,7 +3110,7 @@ hipError_t hipMemAddressReserve(hipDeviceptr_t *Dptr, size_t size, size_t alignm
 }
 
 hipError_t hipMemCreate(hipMemGenericAllocationHandle_t *handle, size_t size,
-                        const hipMemAllocationProp_t *prop, unsigned long long flags) {
+                        const hipMemAllocationProp *prop, unsigned long long flags) {
   CHIP_TRY
   CHIPInitialize();
   NULLCHECK(handle);
@@ -3142,7 +3142,7 @@ hipError_t hipMemMap(hipDeviceptr_t Dptr, size_t size, size_t offset,
 }
 
 hipError_t hipMemSetAccess (hipDeviceptr_t Dptr, size_t size,
-                            const hipMemAccessDesc_t *desc, size_t count) {
+                            const hipMemAccessDesc *desc, size_t count) {
   CHIP_TRY
   CHIPInitialize();
   NULLCHECK(Dptr);
